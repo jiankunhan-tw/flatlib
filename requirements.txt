@@ -1,1 +1,2 @@
 flatlib @ git+https://github.com/jiankunhan-tw/flatlib.git@master
+uvicorn[standard]
