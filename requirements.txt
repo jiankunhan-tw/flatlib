@@ -1,1 +1,3 @@
-pyswisseph==2.08.00-1
+fastapi
+uvicorn
+flatlib==0.2.3
