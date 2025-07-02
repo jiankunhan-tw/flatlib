@@ -12,8 +12,11 @@ def root():
 
 @app.get("/chart")
 def get_chart(date: str, time: str, lat: float, lon: float):
-    dt = Datetime(date, time, '+08:00')
-    pos = GeoPos(str(lat), str(lon))
-    chart = Chart(dt, pos, hsys=PLACIDUS, IDs=TROPICAL)
-    planets = {obj.id: chart[obj.id].sign for obj in chart.objects}
-    return {"planets": planets}
+    try:
+        dt = Datetime(date, time, '+08:00')
+        pos = GeoPos(str(lat), str(lon))
+        chart = Chart(dt, pos, hsys=PLACIDUS, IDs=TROPICAL)
+        planets = {obj.id: chart[obj.id].sign for obj in chart.objects}
+        return {"status": "success", "planets": planets}
+    except Exception as e:
+        return {"status": "error", "message": str(e)}
