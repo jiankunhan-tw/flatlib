@@ -1,1 +1,1 @@
-flatlib @ git+https://github.com/flatlib/flatlib.git@master
+flatlib @ git+https://github.com/jiankunhan-tw/flatlib.git@master
