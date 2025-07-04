@@ -14,5 +14,5 @@ WORKDIR /app
 # 複製本地檔案進容器
 COPY . /app
 
-# 啟動 FastAPI 服務
-CMD ["uvicorn", "api:app", "--host", "0.0.0.0", "--port", "80"]
+# 啟動 FastAPI 服務（這行修正過）
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "80"]
