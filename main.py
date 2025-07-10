@@ -6,10 +6,6 @@ from flatlib import const
 
 app = FastAPI()
 
-@app.get("/")
-def root():
-    return {"message": "Flatlib API is running!"}
-
 @app.get("/chart")
 def get_chart(
     date: str = Query(...),
@@ -19,7 +15,7 @@ def get_chart(
 ):
     try:
         dt = Datetime(date, time, '+08:00')
-        pos = GeoPos(lat.lower(), lon.lower())
+        pos = GeoPos(lat, lon)
         chart = Chart(dt, pos)
 
         planets = {}
@@ -27,11 +23,12 @@ def get_chart(
 
         for obj in classical_planets:
             planet = chart.get(obj)
+            house = chart.houses.getHouse(planet.lon)
             planets[obj] = {
                 "sign": planet.sign,
                 "lon": planet.lon,
                 "lat": planet.lat,
-                "house": getattr(planet, 'house', None)
+                "house": house
             }
 
         return {"status": "success", "planets": planets}
