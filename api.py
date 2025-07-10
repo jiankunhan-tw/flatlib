@@ -15,8 +15,9 @@ def get_chart(
     lon: float = Query(..., description="Longitude as float")
 ):
     try:
+        # ✅ 正確轉換為 float，不做 int()
         dt = Datetime(date, time, tz)
-        pos = GeoPos(lat, lon)  # ✅ 不轉 int，保留精度
+        pos = GeoPos(lat, lon)
         chart = Chart(dt, pos)
 
         body_data = {}
