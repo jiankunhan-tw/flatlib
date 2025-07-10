@@ -11,12 +11,12 @@ def get_chart(
     date: str = Query(..., description="Date in YYYY-MM-DD format"),
     time: str = Query(..., description="Time in HH:MM format"),
     tz: str = Query("+08:00", description="Timezone offset"),
-    lat: float = Query(..., description="Latitude"),
-    lon: float = Query(..., description="Longitude")
+    lat: str = Query(..., description="Latitude"),   # <- 改這裡！
+    lon: str = Query(..., description="Longitude")  # <- 改這裡！
 ):
     try:
         dt = Datetime(date, time, tz)
-        pos = GeoPos(lat, lon)
+        pos = GeoPos(lat, lon)  # flatlib 這裡 expect 的是 str，不是 float
         chart = Chart(dt, pos)
 
         body_data = {}
