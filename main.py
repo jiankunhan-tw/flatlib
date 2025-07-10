@@ -23,7 +23,9 @@ def get_chart(
         chart = Chart(dt, pos)
 
         planets = {}
-        for obj in const.LIST_OBJECTS:
+        classical_planets = [const.SUN, const.MOON, const.MERCURY, const.VENUS, const.MARS, const.JUPITER, const.SATURN]
+
+        for obj in classical_planets:
             planet = chart.get(obj)
             planets[obj] = {
                 "sign": planet.sign,
