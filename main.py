@@ -20,7 +20,9 @@ def get_chart(
     try:
         dt = Datetime(date, time, '+08:00')
         pos = GeoPos(lat.lower(), lon.lower())
-        chart = Chart(dt, pos)  # ❗不加 hsys, IDs，保持默認設定最穩定
+
+        # ✅ 用默認設定，不使用 const.PLACIDUS、ZODIAC_TROPICAL 避免錯誤
+        chart = Chart(dt, pos)
 
         planets = {}
         for obj in const.LIST_OBJECTS:
@@ -33,5 +35,6 @@ def get_chart(
             }
 
         return {"status": "success", "planets": planets}
+
     except Exception as e:
         return {"status": "error", "message": str(e)}
