@@ -16,7 +16,8 @@ def get_chart(
 ):
     try:
         dt = Datetime(f"{date}", f"{time}", tz)
-        pos = GeoPos(lat, lon)
+        pos = GeoPos(float(lat), float(lon))  # ✅ 強制轉 float
+
         chart = Chart(dt, pos)
 
         # 回傳所有行星資訊
