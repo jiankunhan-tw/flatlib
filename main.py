@@ -12,10 +12,10 @@ def root():
 
 @app.get("/chart")
 def get_chart(
-    date: str = Query(..., description="Date in YYYY-MM-DD format"),
-    time: str = Query(..., description="Time in HH:MM format"),
-    lat: str = Query(..., description="Latitude like '24n58'"),
-    lon: str = Query(..., description="Longitude like '121e26'")
+    date: str = Query(...),
+    time: str = Query(...),
+    lat: str = Query(...),
+    lon: str = Query(...)
 ):
     try:
         dt = Datetime(date, time, '+08:00')
@@ -29,7 +29,6 @@ def get_chart(
                 "sign": planet.sign,
                 "lon": planet.lon,
                 "lat": planet.lat,
-                # ✅ 使用 hasattr 確保安全
                 "house": getattr(planet, 'house', None)
             }
 
