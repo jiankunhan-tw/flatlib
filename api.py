@@ -2,56 +2,53 @@ from fastapi import FastAPI, Query
 from flatlib.chart import Chart
 from flatlib.datetime import Datetime
 from flatlib.geopos import GeoPos
-from flatlib.const import ALL_BODIES, HOUSES
+from flatlib import const
 
 app = FastAPI()
 
-# 經緯度格式轉換工具：例如 24.98 -> 24n59
-def decimal_to_geo_string(value: float, direction: str) -> str:
-    deg = int(abs(value))
-    minutes = int(round((abs(value) - deg) * 60))
-    return f"{deg}{direction}{minutes:02d}"
-
 @app.get("/chart")
-def get_full_chart(
-    lat: float = Query(...),
-    lon: float = Query(...),
-    date: str = Query('1995-04-04'),
-    time: str = Query('11:30'),
-    tz: str = Query('+08:00')
+def get_chart(
+    date: str = Query(..., description="Date in YYYY-MM-DD format"),
+    time: str = Query(..., description="Time in HH:MM format"),
+    tz: str = Query("+08:00", description="Timezone offset"),
+    lat: float = Query(..., description="Latitude as float"),
+    lon: float = Query(..., description="Longitude as float")
 ):
-    # 經緯度處理
-    lat_dir = 'n' if lat >= 0 else 's'
-    lon_dir = 'e' if lon >= 0 else 'w'
-    lat_str = decimal_to_geo_string(lat, lat_dir)
-    lon_str = decimal_to_geo_string(lon, lon_dir)
+    try:
+        dt = Datetime(f"{date}", f"{time}", tz)
+        pos = GeoPos(lat, lon)
+        chart = Chart(dt, pos)
 
-    # 命盤基本資料
-    dt = Datetime(date, time, tz)
-    pos = GeoPos(lat_str, lon_str)
-    chart = Chart(dt, pos)
+        # 回傳所有行星資訊
+        body_data = {}
+        for body in const.LIST_OBJECTS:
+            obj = chart.get(body)
+            body_data[body] = {
+                "sign": obj.sign,
+                "lon": obj.lon,
+                "lat": obj.lat,
+                "speed": obj.speed
+            }
 
-    # 所有星體位置
-    bodies = {
-        body: {
-            "sign": chart.get(body).sign,
-            "lon": chart.get(body).lon,
-            "lat": chart.get(body).lat,
-            "speed": chart.get(body).speed
-        } for body in ALL_BODIES
-    }
+        # 回傳所有宮位資訊
+        house_data = {}
+        for i in range(1, 13):
+            house = chart.houses.get(f"H{i}")
+            house_data[f"H{i}"] = {
+                "sign": house.sign,
+                "lon": house.lon
+            }
 
-    # 所有宮位位置（含主星與起始度數）
-    houses = {
-        house: {
-            "sign": chart.houses.get(house).sign,
-            "lon": chart.houses.get(house).lon
-        } for house in HOUSES
-    }
+        return {
+            "status": "success",
+            "datetime": str(dt),
+            "location": str(pos),
+            "bodies": body_data,
+            "houses": house_data
+        }
 
-    return {
-        "datetime": str(dt),
-        "location": str(pos),
-        "bodies": bodies,
-        "houses": houses
-    }
+    except Exception as e:
+        return {
+            "status": "error",
+            "message": str(e)
+        }
