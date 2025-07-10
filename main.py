@@ -2,7 +2,7 @@ from fastapi import FastAPI, Query
 from flatlib.chart import Chart
 from flatlib.datetime import Datetime
 from flatlib.geopos import GeoPos
-from flatlib.const import HOUSES_PLACIDUS, ZODIAC_TROPICAL
+from flatlib import const
 
 app = FastAPI()
 
@@ -20,9 +20,18 @@ def get_chart(
     try:
         dt = Datetime(date, time, '+08:00')
         pos = GeoPos(lat.lower(), lon.lower())
-        chart = Chart(dt, pos, hsys=HOUSES_PLACIDUS, IDs=ZODIAC_TROPICAL)
+        chart = Chart(dt, pos)  # ❗不加 hsys, IDs，保持默認設定最穩定
 
-        planets = {obj.id: chart[obj.id].sign for obj in chart.objects}
+        planets = {}
+        for obj in const.LIST_OBJECTS:
+            planet = chart.get(obj)
+            planets[obj] = {
+                "sign": planet.sign,
+                "lon": planet.lon,
+                "lat": planet.lat,
+                "house": planet.house
+            }
+
         return {"status": "success", "planets": planets}
     except Exception as e:
         return {"status": "error", "message": str(e)}
