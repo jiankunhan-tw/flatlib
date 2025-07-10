@@ -3,7 +3,7 @@ from flatlib.chart import Chart
 from flatlib.datetime import Datetime
 from flatlib.geopos import GeoPos
 from flatlib import const
-from flatlib.ephem import Ephem
+from flatlib.ephem import Ephem  # ✅ 這一行必加！
 
 app = FastAPI()
 
@@ -13,61 +13,59 @@ def root():
 
 @app.get("/chart")
 def get_chart(
-    date: str = Query(...),    
-    time: str = Query(...),    
-    lat: str = Query(...),     
-    lon: str = Query(...)      
+    date: str = Query(...),    # YYYY-MM-DD
+    time: str = Query(...),    # HH:MM
+    lat: float = Query(...),
+    lon: float = Query(...)
 ):
     try:
         dt = Datetime(date, time, '+08:00')
 
-        def parse_coord(val: str, is_lat=True):
-            if any(c.isalpha() for c in val):
-                return val.lower()
-            else:
-                val = float(val)
-                deg = abs(int(val))
-                minutes = int((abs(val) - deg) * 60)
-                direction = (
-                    'n' if is_lat and val >= 0 else
-                    's' if is_lat and val < 0 else
-                    'e' if not is_lat and val >= 0 else
-                    'w'
-                )
-                return f"{deg}{direction}{minutes:02}"
+        def decimal_to_dms_str(value, is_lat=True):
+            degrees = abs(int(value))
+            minutes = int(abs(value - int(value)) * 60)
+            direction = (
+                'n' if is_lat and value >= 0 else
+                's' if is_lat and value < 0 else
+                'e' if not is_lat and value >= 0 else
+                'w'
+            )
+            return f"{degrees}{direction}{minutes:02}"
 
-        lat_str = parse_coord(lat, is_lat=True)
-        lon_str = parse_coord(lon, is_lat=False)
+        lat_str = decimal_to_dms_str(lat, is_lat=True)
+        lon_str = decimal_to_dms_str(lon, is_lat=False)
 
         pos = GeoPos(lat_str, lon_str)
         chart = Chart(dt, pos)
 
         star_list = [
             const.SUN, const.MOON, const.MERCURY, const.VENUS, const.MARS,
-            const.JUPITER, const.SATURN, const.URANUS, const.NEPTUNE, const.PLUTO
+            const.JUPITER, const.SATURN
         ]
 
+        # 先處理內行星
         planets = {}
         for obj in star_list:
+            planet = chart.get(obj)
+            planets[obj] = {
+                "sign": planet.sign,
+                "lon": planet.lon,
+                "lat": planet.lat,
+                "house": getattr(planet, 'house', None)
+            }
+
+        # 再加上外行星：Uranus, Neptune, Pluto（使用 Ephem）
+        for outer in ['Uranus', 'Neptune', 'Pluto']:
             try:
-                if obj in [const.URANUS, const.NEPTUNE, const.PLUTO]:
-                    eph = Ephem(dt, pos, obj)
-                    planets[obj] = {
-                        "sign": eph.sign,
-                        "lon": eph.lon,
-                        "lat": eph.lat,
-                        "house": None
-                    }
-                else:
-                    planet = chart.get(obj)
-                    planets[obj] = {
-                        "sign": planet.sign,
-                        "lon": planet.lon,
-                        "lat": planet.lat,
-                        "house": getattr(planet, 'house', None)
-                    }
-            except Exception as inner:
-                planets[obj] = {"error": str(inner)}
+                p = Ephem(obj=outer, date=dt, pos=pos)
+                planets[outer] = {
+                    "sign": p.sign,
+                    "lon": p.lon,
+                    "lat": p.lat,
+                    "house": None  # 外行星無 house
+                }
+            except Exception as e:
+                planets[outer] = {"error": str(e)}
 
         return {
             "status": "success",
