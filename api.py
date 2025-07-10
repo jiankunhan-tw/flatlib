@@ -11,12 +11,12 @@ def get_chart(
     date: str = Query(..., description="Date in YYYY-MM-DD format"),
     time: str = Query(..., description="Time in HH:MM format"),
     tz: str = Query("+08:00", description="Timezone offset"),
-    lat: str = Query(..., description="Latitude in flatlib format like '25n1'"),
-    lon: str = Query(..., description="Longitude in flatlib format like '121e38'")
+    lat: str = Query(..., description="Latitude like '24n58'"),
+    lon: str = Query(..., description="Longitude like '121e34'")
 ):
     try:
         dt = Datetime(date, time, tz)
-        pos = GeoPos(lat.lower(), lon.lower())  # 要全小寫才不會出錯
+        pos = GeoPos(lat.lower(), lon.lower())
         chart = Chart(dt, pos)
 
         body_data = {}
