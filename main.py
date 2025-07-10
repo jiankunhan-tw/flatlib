@@ -20,8 +20,6 @@ def get_chart(
     try:
         dt = Datetime(date, time, '+08:00')
         pos = GeoPos(lat.lower(), lon.lower())
-
-        # ✅ 用默認設定，不使用 const.PLACIDUS、ZODIAC_TROPICAL 避免錯誤
         chart = Chart(dt, pos)
 
         planets = {}
@@ -31,7 +29,8 @@ def get_chart(
                 "sign": planet.sign,
                 "lon": planet.lon,
                 "lat": planet.lat,
-                "house": planet.house
+                # ✅ 使用 hasattr 確保安全
+                "house": getattr(planet, 'house', None)
             }
 
         return {"status": "success", "planets": planets}
