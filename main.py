@@ -12,28 +12,34 @@ def root():
 
 @app.get("/chart")
 def get_chart(
-    date: str = Query(...),    # YYYY-MM-DD
-    time: str = Query(...),    # HH:MM
-    lat: float = Query(...),   # 緯度，例如 24.968371
-    lon: float = Query(...)    # 經度，例如 121.438034
+    date: str = Query(...),     # YYYY-MM-DD
+    time: str = Query(...),     # HH:MM
+    lat: str = Query(...),      # 經緯度現在改為字串型別
+    lon: str = Query(...)
 ):
     try:
         dt = Datetime(date, time, '+08:00')
 
-        # 將經緯度從 float 轉為 flatlib 格式（例如 25n02、121e31）
-        def decimal_to_dms_str(value, is_lat=True):
-            degrees = abs(int(value))
-            minutes = int(abs(value - int(value)) * 60)
-            direction = (
-                'n' if is_lat and value >= 0 else
-                's' if is_lat and value < 0 else
-                'e' if not is_lat and value >= 0 else
-                'w'
-            )
-            return f"{degrees}{direction}{minutes:02}"
+        # 判斷是否是純 float，如果是就轉為 flatlib 格式
+        def parse_coord(val: str, is_lat=True):
+            if any(c.isalpha() for c in val):
+                # 已是 flatlib 格式（如 25n02）
+                return val.lower()
+            else:
+                # 是小數格式，要轉成 flatlib 格式
+                val = float(val)
+                deg = abs(int(val))
+                minutes = int(abs(val - deg) * 60)
+                direction = (
+                    'n' if is_lat and val >= 0 else
+                    's' if is_lat and val < 0 else
+                    'e' if not is_lat and val >= 0 else
+                    'w'
+                )
+                return f"{deg}{direction}{minutes:02}"
 
-        lat_str = decimal_to_dms_str(lat, is_lat=True)
-        lon_str = decimal_to_dms_str(float(lon), is_lat=False)
+        lat_str = parse_coord(lat, is_lat=True)
+        lon_str = parse_coord(lon, is_lat=False)
 
         pos = GeoPos(lat_str, lon_str)
         chart = Chart(dt, pos)
