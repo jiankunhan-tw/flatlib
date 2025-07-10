@@ -11,11 +11,11 @@ def get_chart(
     date: str = Query(..., description="Date in YYYY-MM-DD format"),
     time: str = Query(..., description="Time in HH:MM format"),
     tz: str = Query("+08:00", description="Timezone offset"),
-    lat: float = Query(..., description="Latitude as float"),
-    lon: float = Query(..., description="Longitude as float")
+    lat: float = Query(..., description="Latitude in decimal degrees"),
+    lon: float = Query(..., description="Longitude in decimal degrees")
 ):
     try:
-        # ✅ 正確轉換為 float，不做 int()
+        # ✅ 使用正確型別轉換
         dt = Datetime(date, time, tz)
         pos = GeoPos(lat, lon)
         chart = Chart(dt, pos)
