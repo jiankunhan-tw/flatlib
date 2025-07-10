@@ -19,11 +19,16 @@ def get_chart(
         chart = Chart(dt, pos)
 
         planets = {}
-        classical_planets = [const.SUN, const.MOON, const.MERCURY, const.VENUS, const.MARS, const.JUPITER, const.SATURN]
+        classical_planets = [
+            const.SUN, const.MOON, const.MERCURY,
+            const.VENUS, const.MARS, const.JUPITER, const.SATURN
+        ]
 
         for obj in classical_planets:
             planet = chart.get(obj)
-            house = chart.houses.getHouse(planet.lon)
+            # ✅ 修正這行：使用 getHouseFromLon，並取 .id 才能回傳宮位編號
+            house = chart.houses.getHouseFromLon(planet.lon).id
+
             planets[obj] = {
                 "sign": planet.sign,
                 "lon": planet.lon,
