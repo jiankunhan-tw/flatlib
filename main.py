@@ -12,24 +12,21 @@ def root():
 
 @app.get("/chart")
 def get_chart(
-    date: str = Query(...),     # YYYY-MM-DD
-    time: str = Query(...),     # HH:MM
-    lat: str = Query(...),      # 經緯度現在改為字串型別
-    lon: str = Query(...)
+    date: str = Query(...),    # YYYY-MM-DD
+    time: str = Query(...),    # HH:MM
+    lat: str = Query(...),     # 緯度，可為 float 或 '25n02'
+    lon: str = Query(...)      # 經度，可為 float 或 '121e31'
 ):
     try:
         dt = Datetime(date, time, '+08:00')
 
-        # 判斷是否是純 float，如果是就轉為 flatlib 格式
         def parse_coord(val: str, is_lat=True):
-            if any(c.isalpha() for c in val):
-                # 已是 flatlib 格式（如 25n02）
+            if any(c.isalpha() for c in val):  # 已是 flatlib 格式
                 return val.lower()
             else:
-                # 是小數格式，要轉成 flatlib 格式
                 val = float(val)
                 deg = abs(int(val))
-                minutes = int(abs(val - deg) * 60)
+                minutes = int((abs(val) - deg) * 60)
                 direction = (
                     'n' if is_lat and val >= 0 else
                     's' if is_lat and val < 0 else
@@ -51,13 +48,16 @@ def get_chart(
 
         planets = {}
         for obj in star_list:
-            planet = chart.get(obj)
-            planets[obj] = {
-                "sign": planet.sign,
-                "lon": planet.lon,
-                "lat": planet.lat,
-                "house": getattr(planet, 'house', None)
-            }
+            try:
+                planet = chart.get(obj)
+                planets[obj] = {
+                    "sign": planet.sign,
+                    "lon": planet.lon,
+                    "lat": planet.lat,
+                    "house": getattr(planet, 'house', None)
+                }
+            except Exception as inner:
+                planets[obj] = {"error": str(inner)}
 
         return {
             "status": "success",
