@@ -1,166 +1,79 @@
-"""
-    This file is part of flatlib - (C) FlatAngle
-    Author: João Ventura (flatangleweb@gmail.com)
-    
-    
-    This module implements functions which are useful
-    for flatlib. Basically, it converts internal objects 
-    and lists from the ephemeris to flatlib.objects and 
-    flatlib.lists.
-    
-    Flatlib users will want to use this module for 
-    accessing the ephemeris.
-    
-"""
-
-from . import eph
-from . import swe
-
+from fastapi import FastAPI, Query
+from flatlib.chart import Chart
 from flatlib.datetime import Datetime
-from flatlib.object import (GenericObject, Object,
-                            House, FixedStar)
-from flatlib.lists import (GenericList, ObjectList,
-                           HouseList, FixedStarList)
+from flatlib.geopos import GeoPos
+from flatlib import const
+from flatlib.ephem import ephem  # ✅ 正確引用 flatlib 的 ephem 模組
+
+app = FastAPI()
+
+@app.get("/")
+def root():
+    return {"message": "Flatlib API is running!"}
 
 
-# === Objects === #
+@app.get("/chart")
+def get_chart(
+    date: str = Query(...),    # YYYY-MM-DD
+    time: str = Query(...),    # HH:MM
+    lat: float = Query(...),
+    lon: float = Query(...)
+):
+    try:
+        dt = Datetime(date, time, '+08:00')
 
-def getObject(ID, date, pos):
-    """ Returns an ephemeris object. """
-    obj = eph.getObject(ID, date.jd, pos.lat, pos.lon)
-    return Object.fromDict(obj)
+        def decimal_to_dms_str(value, is_lat=True):
+            degrees = abs(int(value))
+            minutes = int(abs(value - int(value)) * 60)
+            direction = (
+                'n' if is_lat and value >= 0 else
+                's' if is_lat and value < 0 else
+                'e' if not is_lat and value >= 0 else
+                'w'
+            )
+            return f"{degrees}{direction}{minutes:02}"
 
+        lat_str = decimal_to_dms_str(lat, is_lat=True)
+        lon_str = decimal_to_dms_str(lon, is_lat=False)
 
-def getObjectList(IDs, date, pos):
-    """ Returns a list of objects. """
-    objList = [getObject(ID, date, pos) for ID in IDs]
-    return ObjectList(objList)
+        pos = GeoPos(lat_str, lon_str)
+        chart = Chart(dt, pos)
 
+        star_list = [
+            const.SUN, const.MOON, const.MERCURY, const.VENUS, const.MARS,
+            const.JUPITER, const.SATURN
+        ]
 
-# === Houses and angles === #
+        # 內行星用 chart 拿
+        planets = {}
+        for obj in star_list:
+            planet = chart.get(obj)
+            planets[obj] = {
+                "sign": planet.sign,
+                "lon": planet.lon,
+                "lat": planet.lat,
+                "house": getattr(planet, 'house', None)
+            }
 
-def getHouses(date, pos, hsys):
-    """ Returns the lists of houses and angles.
-    
-    Since houses and angles are computed at the
-    same time, this function should be fast.
-    
-    """
-    houses, angles = eph.getHouses(date.jd, pos.lat, pos.lon, hsys)
-    hList = [House.fromDict(house) for house in houses]
-    aList = [GenericObject.fromDict(angle) for angle in angles]
-    return (HouseList(hList), GenericList(aList))
+        # 外行星：Uranus, Neptune, Pluto（用 ephem.getObject）
+        for outer in ['Uranus', 'Neptune', 'Pluto']:
+            try:
+                planet = ephem.getObject(outer, dt, pos)
+                planets[outer] = {
+                    "sign": planet.sign,
+                    "lon": planet.lon,
+                    "lat": planet.lat,
+                    "house": None  # 外行星無 house
+                }
+            except Exception as e:
+                planets[outer] = {"error": str(e)}
 
+        return {
+            "status": "success",
+            "placidus": True,
+            "tropical": True,
+            "planets": planets
+        }
 
-def getHouseList(date, pos, hsys):
-    """ Returns a list of houses. """
-    return getHouses(date, pos, hsys)['houses']
-
-
-def getAngleList(date, pos, hsys):
-    """ Returns a list of angles (Asc, MC..) """
-    return getHouses(date, pos, hsys)['angles']
-
-
-# === Fixed stars === #
-
-def getFixedStar(ID, date):
-    """ Returns a fixed star from the ephemeris. """
-    star = eph.getFixedStar(ID, date.jd)
-    return FixedStar.fromDict(star)
-
-
-def getFixedStarList(IDs, date):
-    """ Returns a list of fixed stars. """
-    starList = [getFixedStar(ID, date) for ID in IDs]
-    return FixedStarList(starList)
-
-
-# === Solar returns === #
-
-def nextSolarReturn(date, lon):
-    """ Returns the next date when sun is at longitude 'lon'. """
-    jd = eph.nextSolarReturn(date.jd, lon)
-    return Datetime.fromJD(jd, date.utcoffset)
-
-
-def prevSolarReturn(date, lon):
-    """ Returns the previous date when sun is at longitude 'lon'. """
-    jd = eph.prevSolarReturn(date.jd, lon)
-    return Datetime.fromJD(jd, date.utcoffset)
-
-
-# === Sunrise and sunsets === #
-
-def nextSunrise(date, pos):
-    """ Returns the date of the next sunrise. """
-    jd = eph.nextSunrise(date.jd, pos.lat, pos.lon)
-    return Datetime.fromJD(jd, date.utcoffset)
-
-
-def nextSunset(date, pos):
-    """ Returns the date of the next sunset. """
-    jd = eph.nextSunset(date.jd, pos.lat, pos.lon)
-    return Datetime.fromJD(jd, date.utcoffset)
-
-
-def lastSunrise(date, pos):
-    """ Returns the date of the last sunrise. """
-    jd = eph.lastSunrise(date.jd, pos.lat, pos.lon)
-    return Datetime.fromJD(jd, date.utcoffset)
-
-
-def lastSunset(date, pos):
-    """ Returns the date of the last sunset. """
-    jd = eph.lastSunset(date.jd, pos.lat, pos.lon)
-    return Datetime.fromJD(jd, date.utcoffset)
-
-
-# === Station === #
-
-def nextStation(ID, date):
-    """ Returns the aproximate date of the next station. """
-    jd = eph.nextStation(ID, date.jd)
-    return Datetime.fromJD(jd, date.utcoffset)
-
-
-# === Eclipses === #
-
-def prevSolarEclipse(date):
-    """ Returns the Datetime of the maximum phase of the
-    previous global solar eclipse.
-
-    """
-
-    eclipse = swe.solarEclipseGlobal(date.jd, backward=True)
-    return Datetime.fromJD(eclipse['maximum'], date.utcoffset)
-
-
-def nextSolarEclipse(date):
-    """ Returns the Datetime of the maximum phase of the
-    next global solar eclipse.
-
-    """
-
-    eclipse = swe.solarEclipseGlobal(date.jd, backward=False)
-    return Datetime.fromJD(eclipse['maximum'], date.utcoffset)
-
-
-def prevLunarEclipse(date):
-    """ Returns the Datetime of the maximum phase of the
-    previous global lunar eclipse.
-
-    """
-
-    eclipse = swe.lunarEclipseGlobal(date.jd, backward=True)
-    return Datetime.fromJD(eclipse['maximum'], date.utcoffset)
-
-
-def nextLunarEclipse(date):
-    """ Returns the Datetime of the maximum phase of the
-    next global lunar eclipse.
-
-    """
-
-    eclipse = swe.lunarEclipseGlobal(date.jd, backward=False)
-    return Datetime.fromJD(eclipse['maximum'], date.utcoffset)
+    except Exception as e:
+        return {"status": "error", "message": str(e)}
