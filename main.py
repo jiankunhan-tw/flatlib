@@ -1,8 +1,7 @@
 from fastapi import FastAPI, Query
 
 # ✅ 加入內建星曆設定
-from flatlib import ephem
-ephem.set_ephemeris('builtin')
+from flatlib import ephembuiltin
 
 from flatlib.chart import Chart
 from flatlib.datetime import Datetime
