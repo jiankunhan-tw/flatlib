@@ -1,4 +1,7 @@
 from fastapi import FastAPI, Query
+from flatlib import ephem  # ✅ 加入這行
+ephem.set_ephemeris_path('ephe')  # ✅ 指向你放 .se1 檔案的資料夾（要確保路徑正確）
+
 from flatlib.chart import Chart
 from flatlib.datetime import Datetime
 from flatlib.geopos import GeoPos
@@ -56,7 +59,7 @@ def get_chart(
         for obj in star_list:
             try:
                 planet = chart.get(obj)
-                house = chart.houseOf(planet)  # ✅ 宮位
+                house = chart.houseOf(planet)
                 planets[obj] = {
                     "zh": planet_names.get(obj, obj),
                     "sign": planet.sign,
