@@ -1,7 +1,6 @@
 """
     This file is part of flatlib - (C) FlatAngle
     Author: João Ventura (flatangleweb@gmail.com)
-    
 
     This module implements a class to represent an 
     astrology Chart. It provides methods to handle
@@ -17,7 +16,6 @@
     used when you want to deal with angle's longitudes.
     
     There are also methods to access fixed stars.
-    
 """
 
 from . import angle
@@ -25,7 +23,7 @@ from . import const
 from . import utils
 from .ephem import ephem
 from .datetime import Datetime
-
+from .houses import House  # ✅ 加上這行以支援 House.contains()
 
 # ------------------ #
 #    Chart Class     #
@@ -41,7 +39,6 @@ class Chart:
         Optional arguments are:
         - hsys: house system
         - IDs: list of objects to include
-        
         """
         # Handle optional arguments
         hsys = kwargs.get('hsys', const.HOUSES_DEFAULT)
@@ -81,7 +78,6 @@ class Chart:
     def get(self, ID):
         """ Returns an object, house or angle 
         from the chart.
-        
         """
         if ID.startswith('House'):
             return self.getHouse(ID)
@@ -91,10 +87,6 @@ class Chart:
             return self.getObject(ID)
 
     # === Fixed stars === #
-
-    # The computation of fixed stars is inefficient,
-    # so the access must be made directly to the
-    # ephemeris only when needed.
 
     def getFixedStar(self, ID):
         """ Returns a fixed star from the ephemeris. """
@@ -152,13 +144,26 @@ class Chart:
     # === Solar returns === #
 
     def solarReturn(self, year):
-        """ Returns this chart's solar return for a 
-        given year. 
-        
-        """
+        """ Returns this chart's solar return for a given year. """
         sun = self.getObject(const.SUN)
-        date = Datetime('{0}/01/01'.format(year),
-                        '00:00',
-                        self.date.utcoffset)
+        date = Datetime('{0}/01/01'.format(year), '00:00', self.date.utcoffset)
         srDate = ephem.nextSolarReturn(date, sun.lon)
         return Chart(srDate, self.pos, hsys=self.hsys)
+
+    # === New: House locator === #
+
+    def houseOf(self, obj):
+        """Returns the house number (1–12) where the object is located."""
+        # 支援 ID 字串或 object 實例
+        if isinstance(obj, str):
+            obj = self.get(obj)
+        elif hasattr(obj, 'id'):
+            obj = self.get(obj.id)
+        else:
+            raise ValueError("Unsupported object type for houseOf()")
+
+        for house in self.houses:
+            if House.contains(house, obj.lon):
+                return int(house.id)
+
+        return None
