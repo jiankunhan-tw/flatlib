@@ -6,11 +6,20 @@ from flatlib import const
 
 app = FastAPI()
 
-# 英文星座轉中文
+# 英文星座 → 中文對照表
 sign_map = {
-    "Aries": "牡羊座", "Taurus": "金牛座", "Gemini": "雙子座", "Cancer": "巨蟹座",
-    "Leo": "獅子座", "Virgo": "處女座", "Libra": "天秤座", "Scorpio": "天蠍座",
-    "Sagittarius": "射手座", "Capricorn": "摩羯座", "Aquarius": "水瓶座", "Pisces": "雙魚座"
+    'Aries': '牡羊座',
+    'Taurus': '金牛座',
+    'Gemini': '雙子座',
+    'Cancer': '巨蟹座',
+    'Leo': '獅子座',
+    'Virgo': '處女座',
+    'Libra': '天秤座',
+    'Scorpio': '天蠍座',
+    'Sagittarius': '射手座',
+    'Capricorn': '摩羯座',
+    'Aquarius': '水瓶座',
+    'Pisces': '雙魚座'
 }
 
 @app.get("/")
@@ -45,8 +54,9 @@ def get_chart(
         lat_str = parse_coord(lat, is_lat=True)
         lon_str = parse_coord(lon, is_lat=False)
 
+        # ⚠️ 指定使用 placidus 宮位制
         pos = GeoPos(lat_str, lon_str)
-        chart = Chart(dt, pos)
+        chart = Chart(dt, pos, hsys=const.HOUSES_PLACIDUS)
 
         star_list = [
             const.SUN, const.MOON, const.MERCURY, const.VENUS, const.MARS,
@@ -58,9 +68,8 @@ def get_chart(
             try:
                 planet = chart.get(obj)
                 planets[obj] = {
-                    "星體": obj,
                     "星座": sign_map.get(planet.sign, planet.sign),
-                    "宮位": planet.house
+                    "宮位": planet.house  # 宮位號碼（1～12）
                 }
             except Exception as inner:
                 planets[obj] = {"error": str(inner)}
