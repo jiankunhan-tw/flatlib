@@ -6,6 +6,13 @@ from flatlib import const
 
 app = FastAPI()
 
+# 英文星座轉中文
+sign_map = {
+    "Aries": "牡羊座", "Taurus": "金牛座", "Gemini": "雙子座", "Cancer": "巨蟹座",
+    "Leo": "獅子座", "Virgo": "處女座", "Libra": "天秤座", "Scorpio": "天蠍座",
+    "Sagittarius": "射手座", "Capricorn": "摩羯座", "Aquarius": "水瓶座", "Pisces": "雙魚座"
+}
+
 @app.get("/")
 def root():
     return {"message": "Flatlib API is running!"}
@@ -51,10 +58,9 @@ def get_chart(
             try:
                 planet = chart.get(obj)
                 planets[obj] = {
-                    "sign": planet.sign,
-                    "lon": planet.lon,
-                    "lat": planet.lat,
-                    "house": getattr(planet, 'house', None)
+                    "星體": obj,
+                    "星座": sign_map.get(planet.sign, planet.sign),
+                    "宮位": planet.house
                 }
             except Exception as inner:
                 planets[obj] = {"error": str(inner)}
