@@ -24,12 +24,16 @@ from . import utils
 from .ephem import ephem
 from .datetime import Datetime
 
-# ✅ 直接內嵌 House 類別
+# ✅ 新增：定義 nextSign 函數（每30度切換星座）
+def nextSign(start):
+    return ((int(start) // 30 + 1) * 30) % 360
+
+# ✅ 直接內嵌 House 類別，使用自定 nextSign()
 class House:
     @staticmethod
     def contains(house, lon):
         start = house.lon
-        end = angle.nextSign(start)
+        end = nextSign(start)
         if start < end:
             return start <= lon < end
         else:
