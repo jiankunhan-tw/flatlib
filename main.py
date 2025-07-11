@@ -21,7 +21,7 @@ def get_chart(
         dt = Datetime(date, time, '+08:00')
 
         def parse_coord(val: str, is_lat=True):
-            if any(c.isalpha() for c in val):  # 已是 flatlib 格式
+            if any(c.isalpha() for c in val):
                 return val.lower()
             else:
                 val = float(val)
@@ -47,23 +47,16 @@ def get_chart(
         ]
 
         planet_names = {
-            const.SUN: "太陽",
-            const.MOON: "月亮",
-            const.MERCURY: "水星",
-            const.VENUS: "金星",
-            const.MARS: "火星",
-            const.JUPITER: "木星",
-            const.SATURN: "土星",
-            const.URANUS: "天王星",
-            const.NEPTUNE: "海王星",
-            const.PLUTO: "冥王星",
+            const.SUN: "太陽", const.MOON: "月亮", const.MERCURY: "水星", const.VENUS: "金星",
+            const.MARS: "火星", const.JUPITER: "木星", const.SATURN: "土星",
+            const.URANUS: "天王星", const.NEPTUNE: "海王星", const.PLUTO: "冥王星"
         }
 
         planets = {}
         for obj in star_list:
             try:
                 planet = chart.get(obj)
-                house = chart.houseOf(planet)  # ✅ 正確取得宮位
+                house = chart.houseOf(planet)  # ✅ 宮位
                 planets[obj] = {
                     "zh": planet_names.get(obj, obj),
                     "sign": planet.sign,
