@@ -1,3 +1,3 @@
-fastapi
+flatlib @ git+https://github.com/jiankunhan-tw/flatlib.git@master
 uvicorn
-flatlib @ git+https://github.com/flatlib/flatlib.git@ephem
+fastapi
