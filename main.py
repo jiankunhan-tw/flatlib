@@ -1,7 +1,4 @@
 from fastapi import FastAPI, Query
-from flatlib import ephem  # ✅ 加入這行
-ephem.set_ephemeris_path('ephe')  # ✅ 指向你放 .se1 檔案的資料夾（要確保路徑正確）
-
 from flatlib.chart import Chart
 from flatlib.datetime import Datetime
 from flatlib.geopos import GeoPos
