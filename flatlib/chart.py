@@ -49,7 +49,8 @@ class Chart:
 
     def __init__(self, date, pos, **kwargs):
         hsys = kwargs.get('hsys', const.HOUSES_DEFAULT)
-        IDs = kwargs.get('IDs', const.LIST_OBJECTS_TRADITIONAL)
+        # ✅ 支援現代行星
+        IDs = kwargs.get('IDs', const.LIST_OBJECTS + const.LIST_MODERN)
 
         self.date = date
         self.pos = pos
@@ -152,6 +153,7 @@ class Chart:
 
         for house in self.houses:
             if House.contains(house, obj.lon):
-                return int(house.id)
+                # ✅ 將 'House10' → 轉成 int(10)
+                return int(house.id.replace('House', ''))
 
         return None
