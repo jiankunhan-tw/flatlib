@@ -14,14 +14,14 @@ def root():
 def get_chart(
     date: str = Query(...),    # YYYY-MM-DD
     time: str = Query(...),    # HH:MM
-    lat: str = Query(...),     # 緯度
-    lon: str = Query(...)      # 經度
+    lat: str = Query(...),     # 緯度，可為 float 或 '25n02'
+    lon: str = Query(...)      # 經度，可為 float 或 '121e31'
 ):
     try:
         dt = Datetime(date, time, '+08:00')
 
         def parse_coord(val: str, is_lat=True):
-            if any(c.isalpha() for c in val):
+            if any(c.isalpha() for c in val):  # 已是 flatlib 格式
                 return val.lower()
             else:
                 val = float(val)
@@ -46,23 +46,15 @@ def get_chart(
             const.JUPITER, const.SATURN, const.URANUS, const.NEPTUNE, const.PLUTO
         ]
 
-        planet_names = {
-            const.SUN: "太陽", const.MOON: "月亮", const.MERCURY: "水星", const.VENUS: "金星",
-            const.MARS: "火星", const.JUPITER: "木星", const.SATURN: "土星",
-            const.URANUS: "天王星", const.NEPTUNE: "海王星", const.PLUTO: "冥王星"
-        }
-
         planets = {}
         for obj in star_list:
             try:
                 planet = chart.get(obj)
-                house = chart.houseOf(planet)
                 planets[obj] = {
-                    "zh": planet_names.get(obj, obj),
                     "sign": planet.sign,
                     "lon": planet.lon,
                     "lat": planet.lat,
-                    "house": house
+                    "house": getattr(planet, 'house', None)
                 }
             except Exception as inner:
                 planets[obj] = {"error": str(inner)}
