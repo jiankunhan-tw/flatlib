@@ -1,12 +1,14 @@
-"""
-This file is part of flatlib - (C) FlatAngle
-Author: João Ventura (flatangleweb@gmail.com)
+""" 
+    This file is part of flatlib - (C) FlatAngle
+    Author: João Ventura (flatangleweb@gmail.com)
+    
 
-This module defines the names of signs, objects, angles, 
-houses and fixed-stars used in the library.
+    This module defines the names of signs, objects, angles, 
+    houses and fixed-stars used in the library.
+
 """
 
-# === Base constants ===
+# === Base constants === */
 
 # Four primitive qualities
 HOT = 'Hot'
@@ -47,7 +49,7 @@ MOON_SECOND_QUARTER = 'Second Quarter'
 MOON_THIRD_QUARTER = 'Third Quarter'
 MOON_LAST_QUARTER = 'Last Quarter'
 
-# === Signs ===
+# === Signs === */
 
 ARIES = 'Aries'
 TAURUS = 'Taurus'
@@ -79,7 +81,7 @@ SIGN_STERILE = 'Sterile'
 SIGN_MODERATELY_FERTILE = 'Moderately Fertile'
 SIGN_MODERATELY_STERILE = 'Moderately Sterile'
 
-# === Objects ===
+# === Objects === */
 
 # Names
 SUN = 'Sun'
@@ -118,7 +120,7 @@ OBJ_ASTEROID = 'Asteroid'
 OBJ_LUNATION = 'Lunation'
 OBJ_GENERIC = 'Generic'
 
-# === Houses ===
+# === Houses === */
 
 HOUSE1 = 'House1'
 HOUSE2 = 'House2'
@@ -159,14 +161,14 @@ HOUSES_ALCABITUS = 'Alcabitus'
 HOUSES_MORINUS = 'Morinus'
 HOUSES_DEFAULT = HOUSES_ALCABITUS
 
-# === Angles ===
+# === Angles === */
 
 ASC = 'Asc'
 DESC = 'Desc'
 MC = 'MC'
 IC = 'IC'
 
-# === Fixed Stars ===
+# === Fixed Stars === */
 
 STAR_ALGENIB = 'Algenib'
 STAR_ALPHERATZ = 'Alpheratz'
@@ -202,10 +204,10 @@ STAR_VEGA = 'Vega'
 STAR_ALTAIR = 'Altair'
 STAR_DENEB_ALGEDI = 'Deneb Algedi'
 STAR_FOMALHAUT = 'Fomalhaut'
-STAR_DENEB_ADIGE = 'Deneb'
+STAR_DENEB_ADIGE = 'Deneb'  # Alpha-Cygnus
 STAR_ACHERNAR = 'Achernar'
 
-# === Aspects ===
+# === Aspects === */
 
 # Major Aspects
 NO_ASPECT = -1
@@ -232,8 +234,8 @@ EXACT = 'Exact'
 NO_MOVEMENT = 'None'
 
 # Aspect direction
-DEXTER = 'Dexter'
-SINISTER = 'Sinister'
+DEXTER = 'Dexter'  # Right side
+SINISTER = 'Sinister'  # Left side
 
 # Aspect properties
 ASSOCIATE = 'Associate'
@@ -244,7 +246,7 @@ MAJOR_ASPECTS = [0, 60, 90, 120, 180]
 MINOR_ASPECTS = [30, 36, 45, 72, 108, 135, 144, 150]
 ALL_ASPECTS = MAJOR_ASPECTS + MINOR_ASPECTS
 
-# === Some Lists ===
+# === Some Lists === */
 
 LIST_SIGNS = [
     ARIES, TAURUS, GEMINI, CANCER, LEO, VIRGO, LIBRA,
@@ -287,47 +289,3 @@ LIST_FIXED_STARS = [
     STAR_LESATH, STAR_VEGA, STAR_ALTAIR, STAR_DENEB_ALGEDI,
     STAR_FOMALHAUT, STAR_DENEB_ADIGE, STAR_ACHERNAR,
 ]
-
-# === Modern Support ===
-
-LIST_MODERN = [
-    URANUS, NEPTUNE, PLUTO
-]
-
-LIST_TEN_PLANETS = [
-    SUN, MOON, MERCURY, VENUS, MARS,
-    JUPITER, SATURN, URANUS, NEPTUNE, PLUTO
-]
-
-ZH_OBJECT_NAMES = {
-    SUN: "太陽",
-    MOON: "月亮",
-    MERCURY: "水星",
-    VENUS: "金星",
-    MARS: "火星",
-    JUPITER: "木星",
-    SATURN: "土星",
-    URANUS: "天王星",
-    NEPTUNE: "海王星",
-    PLUTO: "冥王星",
-    CHIRON: "凱龍",
-    NORTH_NODE: "北交點",
-    SOUTH_NODE: "南交點",
-    SYZYGY: "朔望點",
-    PARS_FORTUNA: "幸福點"
-}
-
-ZH_HOUSE_NAMES = {
-    HOUSE1: "命宮",
-    HOUSE2: "財帛宮",
-    HOUSE3: "兄弟宮",
-    HOUSE4: "田宅宮",
-    HOUSE5: "子女宮",
-    HOUSE6: "奴僕宮",
-    HOUSE7: "夫妻宮",
-    HOUSE8: "疾厄宮",
-    HOUSE9: "遷移宮",
-    HOUSE10: "官祿宮",
-    HOUSE11: "福德宮",
-    HOUSE12: "玄秘宮"
-}
